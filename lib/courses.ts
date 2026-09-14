@@ -5,7 +5,8 @@ import {
   push,
   set,
   get,
-  remove
+  remove,
+  update
 } from "firebase/database";
 
 export interface Course {
@@ -15,48 +16,53 @@ export interface Course {
   description2?: string;
   link: string;
   category: string;
+  level?: "Beginner" | "Intermediate" | "Advanced";
+  tags?: string;
+  published?: boolean;
+  createdAt?: number;
+  updatedAt?: number;
 }
 
+// Course records are stored under one Firebase path; Firebase generates each record's ID.
 export async function addCourse(course: Course) {
-  console.log("1. addCourse called:", course);
+  const coursesRef = ref(db, "courses");
+  const newCourseRef = push(coursesRef);
 
-  try {
-    const coursesRef = ref(db, "courses");
-    console.log("2. coursesRef created");
+  await set(newCourseRef, {
+    ...course,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  });
 
-    const newCourseRef = push(coursesRef);
-    console.log("3. new course key:", newCourseRef.key);
-
-    await set(newCourseRef, {
-      ...course,
-      createdAt: Date.now(),
-    });
-
-    console.log("4. Firebase write successful!");
-
-    alert("Course uploaded successfully!");
-
-    return newCourseRef.key;
-
-  } catch (error) {
-    console.error("❌ Firebase error:", error);
-
-    alert("Failed to upload course. Check the console.");
-
-    return null;
-  }
+  return newCourseRef.key;
 }
-export async function getCourses() {
+export type StoredCourse = Course & { id: string };
+
+// Convert Firebase's ID-keyed object into the array shape used by the UI.
+export async function getCourses(): Promise<StoredCourse[]> {
   const snapshot = await get(ref(db, "courses"));
 
   if (!snapshot.exists()) return [];
 
   const data = snapshot.val();
 
-  return Object.entries(data).map(([id, value]: any) => ({
+  return Object.entries(data).map(([id, value]) => ({
     id,
-    ...value,
+    ...(value as Course),
+    published: (value as Course).published ?? true,
   }));
+}
+
+export async function getCourse(id: string): Promise<StoredCourse | null> {
+  const snapshot = await get(ref(db, `courses/${id}`));
+
+  if (!snapshot.exists()) return null;
+
+  return {
+    id,
+    ...(snapshot.val() as Course),
+    published: (snapshot.val() as Course).published ?? true,
+  };
 }
 
 export async function deleteCourse(id: string) {
@@ -64,5 +70,8 @@ export async function deleteCourse(id: string) {
 }
 
 export async function updateCourse(id: string, data: Partial<Course>) {
-  await update(ref(db, `courses/${id}`), data);
+  await update(ref(db, `courses/${id}`), {
+    ...data,
+    updatedAt: Date.now(),
+  });
 }

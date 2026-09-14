@@ -2,13 +2,19 @@ import dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
 
-import { adminAuth } from "./db_firebase/firebase-admin";
-
 async function makeAdmin() {
   try {
-    const user = await adminAuth.getUserByEmail("ozohefe@gmail.com");
+    const { adminAuth } = await import("./db_firebase/firebase-admin");
+    const email = process.env.ADMIN_EMAIL;
+
+    if (!email) {
+      throw new Error("Set ADMIN_EMAIL to the Firebase Auth user's email.");
+    }
+
+    const user = await adminAuth.getUserByEmail(email);
 
     await adminAuth.setCustomUserClaims(user.uid, {
+      ...user.customClaims,
       admin: true,
     });
 
@@ -16,6 +22,7 @@ async function makeAdmin() {
     console.log("UID:", user.uid);
   } catch (error) {
     console.error("❌ Failed to make user admin:", error);
+    process.exitCode = 1;
   }
 }
 

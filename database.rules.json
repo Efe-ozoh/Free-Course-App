@@ -1,0 +1,11 @@
+{
+  "rules": {
+    "courses": {
+      ".read": true,
+      ".write": "auth != null && auth.token.admin === true",
+      "$courseId": {
+        ".validate": "newData.hasChildren(['title', 'image', 'description1', 'link', 'category']) && newData.child('title').isString() && newData.child('image').isString() && newData.child('description1').isString() && newData.child('link').isString() && newData.child('category').isString()"
+      }
+    }
+  }
+}

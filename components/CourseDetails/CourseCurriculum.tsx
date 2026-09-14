@@ -13,6 +13,7 @@ export default function CourseCurriculum({
 }: {
   sections: CurriculumSection[];
 }) {
+  // Only one section is expanded at a time to keep long curricula scannable.
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   return (

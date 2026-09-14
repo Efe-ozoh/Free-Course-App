@@ -1,156 +1,42 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
-import { addCourse } from "../../../../lib/courses";
-import { auth } from "../../../../db_firebase/firebase";
 
+import CourseForm from "@/components/AdminCourse/CourseForm";
+import { auth } from "@/db_firebase/firebase";
+import Link from "next/link";
+import { ArrowLeft, Sparkles } from "lucide-react";
 
-export default function AdminCourses() {
-
+export default function AddCoursePage() {
   const router = useRouter();
 
-  const [loading, setLoading] = useState(false);
-
-  const [course, setCourse] = useState({
-    title: "",
-    image: "",
-    description1: "",
-    description2: "",
-    link: "",
-    category: "",
-  });
-
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    // Keep the client-side guard for direct navigation before Firebase session state settles.
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (!user) {
         router.replace("/admin/login");
-        return;
       }
-
     });
 
-    return () => unsubscribe();
+    return unsubscribe;
   }, [router]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    setCourse({
-      ...course,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-  
-    if (
-      !course.title ||
-      !course.image ||
-      !course.description1 ||
-      !course.link ||
-      !course.category
-    ) {
-      alert("Please fill all required fields.");
-      return;
-    }
-  
-    setLoading(true);
-  
-    try {
-      await addCourse(course);
-      setCourse({
-        title: "",
-        image: "",
-        description1: "",
-        description2: "",
-        link: "",
-        category: "",
-      });
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong.");
-    } finally {
-      setLoading(false);
-    }
-  };
   return (
-    <div className="min-h-screen bg-gray-100 flex justify-center py-10 px-4">
-      <div className="w-full max-w-3xl bg-white rounded-xl shadow-lg p-8">
-
-        <h1 className="text-3xl font-bold mb-8">
-          Upload Course
-        </h1>
-
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-5"
-        >
-
-          <input
-            type="text"
-            name="title"
-            placeholder="Course Title"
-            value={course.title}
-            onChange={handleChange}
-            className="w-full border p-3 rounded-lg"
-          />
-
-          <input
-            type="text"
-            name="image"
-            placeholder="Image URL"
-            value={course.image}
-            onChange={handleChange}
-            className="w-full border p-3 rounded-lg"
-          />
-
-          <textarea
-            rows={4}
-            name="description1"
-            placeholder="Description 1"
-            value={course.description1}
-            onChange={handleChange}
-            className="w-full border p-3 rounded-lg"
-          />
-
-          <textarea
-            rows={4}
-            name="description2"
-            placeholder="Description 2 (Optional)"
-            value={course.description2}
-            onChange={handleChange}
-            className="w-full border p-3 rounded-lg"
-          />
-
-          <input
-            type="text"
-            name="link"
-            placeholder="Course URL"
-            value={course.link}
-            onChange={handleChange}
-            className="w-full border p-3 rounded-lg"
-          />
-
-          <input
-            type="text"
-            name="category"
-            placeholder="Category (Frontend, AI, Design...)"
-            value={course.category}
-            onChange={handleChange}
-            className="w-full border p-3 rounded-lg"
-          />
-
-          <button
-            disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700"
-          >
-            {loading ? "Uploading..." : "Upload Course"}
-          </button>
-
-        </form>
+    <div className="min-h-screen bg-[var(--background)] px-4 py-8 text-[var(--foreground)] sm:px-8 lg:px-12 lg:py-10">
+      <div className="mx-auto max-w-6xl">
+        <Link href="/admin/dashboard" className="inline-flex items-center gap-2 text-sm font-semibold text-[var(--muted)] transition hover:text-[#e37445]">
+          <ArrowLeft size={16} /> Back to dashboard
+        </Link>
+        <div className="mt-8 max-w-2xl">
+          <div className="flex items-center gap-2 text-sm font-bold uppercase tracking-[0.18em] text-[#e37445]"><Sparkles size={16} /> Course studio</div>
+          <h1 className="mt-3 text-4xl font-black tracking-tight sm:text-5xl">Add something worth learning.</h1>
+          <p className="mt-3 text-base leading-7 text-[var(--muted)]">Give learners a clear path into your next course. You can refine every detail before publishing it to your library.</p>
+        </div>
+        <div className="mt-10 rounded-3xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-sm sm:p-8">
+          <CourseForm />
+        </div>
       </div>
     </div>
   );

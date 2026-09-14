@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
       );
     }
     
+    // Verify both the Firebase token and the custom admin claim before creating a session.
     const decodedToken = await adminAuth.verifyIdToken(idToken);
 
     if (decodedToken.admin !== true) {
@@ -22,7 +23,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const expiresIn = 60 * 60 * 24 * 5 * 1000; // 5 days
+    const expiresIn = 60 * 60 * 24 * 5 * 1000; // Keep the server session valid for five days.
 
     const sessionCookie = await adminAuth.createSessionCookie(idToken, {
       expiresIn,

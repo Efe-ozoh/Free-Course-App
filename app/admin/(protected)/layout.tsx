@@ -8,6 +8,7 @@ export default async function AdminLayout({
 }) {
   const user = await verifySession();
 
+  // Protect every route in this group before its page is rendered.
   if (!user) {
     redirect("/admin/login");
   }

@@ -1,21 +1,10 @@
-import CourseCard from "@/components/Cards/CourseCard";
+import Courses from "@/components/Cards/Courses";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#0a0b10] px-6 py-12">
+    <main className="min-h-screen bg-[var(--background)] px-6 py-12 text-[var(--foreground)]">
     <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      <CourseCard
-        category="All Courses"
-        title="Google Veo 3.1 Complete Mastery: From Text to Cinema"
-      />
-      <CourseCard
-        category="All Courses"
-        title="FastAPI + WebSockets: Real-Time Job Pipelines"
-      />
-      <CourseCard
-        category="All Courses"
-        title="Machine Learning for Counterfeit Detection"
-      />
+      <Courses />
     </div>
   </main>
   );

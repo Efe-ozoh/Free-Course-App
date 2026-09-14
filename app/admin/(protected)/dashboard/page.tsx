@@ -1,175 +1,57 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Image from "next/image";
+import { useState } from "react";
+import Link from "next/link";
+import { Plus } from "lucide-react";
 
-import { getCourses, deleteCourse } from "@/lib/courses";
+import CourseFilters from "@/components/AdminDashboard/CourseFilters";
+import CourseList from "@/components/AdminDashboard/CourseList";
+import DashboardSidebar from "@/components/AdminDashboard/DashboardSidebar";
+import DashboardStats from "@/components/AdminDashboard/DashboardStats";
+import { useAdminCourses } from "@/components/AdminDashboard/useAdminCourses";
 
 export default function AdminDashboard() {
-  const [loading, setLoading] = useState(true);
-  const [courses, setCourses] = useState<any[]>([]);
+  const { courses, loading, removeCourse } = useAdminCourses();
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
 
-  const loadCourses = async () => {
-    try {
-      setLoading(true);
-
-      const data = await getCourses();
-      setCourses(data);
-    } catch (error) {
-      console.error("Failed to load courses:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadCourses();
-  }, []);
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this course?")) {
-      return;
-    }
-
-    try {
-      await deleteCourse(id);
-      await loadCourses();
-    } catch (error) {
-      console.error("Failed to delete course:", error);
-      alert("Failed to delete course.");
-    }
-  };
-
+  const categories = Array.from(new Set(courses.map((course) => course.category).filter(Boolean)));
+  // Filtering remains in the page so the stats, result count, and list share one result set.
   const filteredCourses = courses.filter((course) => {
-    const matchTitle = course.title
-      ?.toLowerCase()
-      .includes(search.toLowerCase());
-
-    const matchCategory =
-      category === "All" ||
-      course.category === category;
-
-    return matchTitle && matchCategory;
+    const matchesTitle = course.title?.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory = category === "All" || course.category === category;
+    return matchesTitle && matchesCategory;
   });
 
+  const handleLogout = async () => {
+    // Clear the server cookie before returning to the login screen.
+    await fetch("/api/adminLogout", { method: "POST" });
+    window.location.href = "/admin/login";
+  };
+
   if (loading) {
-    return (
-      <div className="flex min-h-[400px] items-center justify-center">
-        <p className="text-gray-500">Loading courses...</p>
-      </div>
-    );
+    return <div className="flex min-h-screen items-center justify-center bg-[var(--background)]"><div className="flex items-center gap-3 text-sm font-medium text-[var(--muted)]"><span className="h-2 w-2 animate-pulse rounded-full bg-[#e37445]" />Loading your workspace...</div></div>;
   }
 
   return (
-    <div className="p-8">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+      <div className="flex min-h-screen">
+        <DashboardSidebar onLogout={handleLogout} />
+        <main className="min-w-0 flex-1 px-5 py-6 sm:px-8 lg:px-12 lg:py-9">
+          <header className="flex items-center justify-between gap-4">
+            <div><p className="text-sm font-semibold text-[#e37445]">Monday, September 7, 2026</p><h1 className="mt-1 text-3xl font-black tracking-tight sm:text-4xl">Good morning, Admin</h1><p className="mt-2 text-sm text-[var(--muted)]">Here is what is happening with your learning library.</p></div>
+            <Link href="/admin/add_course" className="flex shrink-0 items-center gap-2 rounded-xl bg-[#e37445] px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-[#c95e32]"><Plus size={17} /><span className="hidden sm:inline">Add course</span></Link>
+          </header>
 
-      {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">
-          Course Dashboard
-        </h1>
+          <DashboardStats courses={courses} visibleCourses={filteredCourses.length} />
 
-        <p className="mt-1 text-gray-500">
-          Manage your courses from here.
-        </p>
+          <section className="mt-10">
+            <div className="mb-5 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><h2 className="text-xl font-black tracking-tight">Course library</h2><p className="mt-1 text-sm text-[var(--muted)]">Manage, organize, and refine your content.</p></div><div className="flex items-center gap-2 text-xs font-semibold text-[var(--muted)]"><span className="h-2 w-2 rounded-full bg-[#e37445]" />{filteredCourses.length} results</div></div>
+            <CourseFilters search={search} category={category} categories={categories} onSearchChange={setSearch} onCategoryChange={setCategory} />
+            <CourseList courses={filteredCourses} onDelete={removeCourse} />
+          </section>
+        </main>
       </div>
-
-      {/* Search & Filter */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row">
-
-        <input
-          type="text"
-          placeholder="Search courses..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="rounded-lg border px-4 py-3 outline-none focus:border-blue-500 sm:w-80"
-        />
-
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="rounded-lg border px-4 py-3 outline-none focus:border-blue-500"
-        >
-          <option value="All">All Categories</option>
-          <option value="Frontend">Frontend</option>
-          <option value="Backend">Backend</option>
-          <option value="AI">AI</option>
-          <option value="UI/UX">UI/UX</option>
-        </select>
-
-      </div>
-
-      {/* Course Count */}
-      <div className="mb-5">
-        <h2 className="font-semibold">
-          Total Courses: {filteredCourses.length}
-        </h2>
-      </div>
-
-      {/* Courses */}
-      {filteredCourses.length === 0 ? (
-        <div className="rounded-lg border p-10 text-center">
-          <p className="text-gray-500">
-            No courses found.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-
-          {filteredCourses.map((course) => (
-            <div
-              key={course.id}
-              className="flex flex-col gap-4 rounded-xl border bg-white p-4 shadow-sm sm:flex-row sm:items-center"
-            >
-
-              {/* Image */}
-              <Image
-                src={course.image}
-                alt={course.title}
-                width={80}
-                height={80}
-                className="h-20 w-20 rounded-lg object-cover"
-              />
-
-              {/* Course information */}
-              <div className="flex-1">
-                <h3 className="font-semibold">
-                  {course.title}
-                </h3>
-
-                <p className="mt-1 text-sm text-gray-500">
-                  {course.category}
-                </p>
-              </div>
-
-              {/* Actions */}
-              <div className="flex gap-2">
-
-                <button
-                  type="button"
-                  className="rounded-lg bg-yellow-500 px-4 py-2 text-sm font-medium text-white hover:bg-yellow-600"
-                >
-                  Edit
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleDelete(course.id)}
-                  className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
-                >
-                  Delete
-                </button>
-
-              </div>
-
-            </div>
-          ))}
-
-        </div>
-      )}
-
     </div>
   );
 }

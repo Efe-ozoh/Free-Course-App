@@ -4,6 +4,7 @@ import { adminAuth } from "../db_firebase/firebase-admin";
 export async function verifySession() {
   const cookieStore = await cookies();
 
+  // The session cookie is httpOnly, so only the server can validate it.
   const session = cookieStore.get("session")?.value;
 
   if (!session) {

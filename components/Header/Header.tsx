@@ -1,37 +1,42 @@
 "use client";
 
-import { useState } from "react";
-import { Search, Menu, X, ChevronDown, Sparkles } from "lucide-react";
+import { FormEvent, useState } from "react";
+import { Search, Menu, X, ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
+import ThemeToggle from "@/components/ThemeToggle";
+import Image from "next/image";
+import logo from "@/public/logo.png";
 
-const NAV_LINKS = [
+const NAV_LINKS: Array<{ label: string; href: string; hasDropdown?: boolean }> = [
   { label: "Home", href: "/" },
-  { label: "All Courses", href: "/courses" },
-  { label: "Categories", href: "/categories", hasDropdown: true },
+  { label: "Terms Of Use", href: "/terms" },
   { label: "About", href: "/about" },
 ];
 
-const CATEGORY_LINKS = [
-  "AI & Machine Learning",
-  "Web Development",
-  "Video Editing",
-  "Design",
-  "Marketing",
-];
-
 export default function Header() {
+  const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [categoriesOpen, setCategoriesOpen] = useState(false);
 
+  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    // Always send searches to the course library, even when submitted from a detail page.
+    const search = new FormData(event.currentTarget).get("search")?.toString().trim() ?? "";
+    router.push(search ? `/?search=${encodeURIComponent(search)}` : "/");
+  };
+
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/80 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-[var(--border)] bg-[var(--surface)]/85 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center gap-4 px-5 sm:px-6">
         {/* Logo */}
         <a href="/" className="flex shrink-0 items-center gap-2">
           <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600">
-            <Sparkles className="h-4 w-4 text-white" />
+            <Image 
+            src={logo}
+            alt="Eduliver Logo" />
           </span>
-          <span className="text-[15px] font-bold tracking-tight text-slate-900">
-            tutorial<span className="text-indigo-600">app</span>
+          <span className="text-[15px] font-bold tracking-tight text-[var(--foreground)]">
+            Edu<span className="text-indigo-600">liver</span>
           </span>
         </a>
 
@@ -53,25 +58,13 @@ export default function Header() {
                     }`}
                   />
                 </button>
-                {categoriesOpen && (
-                  <div className="absolute left-0 top-full w-56 rounded-xl border border-slate-200 bg-white p-2 shadow-lg shadow-slate-900/5">
-                    {CATEGORY_LINKS.map((cat) => (
-                      <a
-                        key={cat}
-                        href="#"
-                        className="block rounded-lg px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                      >
-                        {cat}
-                      </a>
-                    ))}
-                  </div>
-                )}
+               
               </div>
             ) : (
               <a
                 key={link.label}
                 href={link.href}
-                className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
+                className="rounded-lg px-3 py-2 text-sm font-medium text-[var(--muted)] transition-colors hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]"
               >
                 {link.label}
               </a>
@@ -80,14 +73,10 @@ export default function Header() {
         </nav>
 
         {/* Search bar (desktop) */}
-        <div className="ml-auto hidden flex-1 max-w-xs items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-2 transition-colors focus-within:border-indigo-300 focus-within:bg-white focus-within:ring-2 focus-within:ring-indigo-100 md:flex">
+        <form onSubmit={handleSearch} className="ml-auto hidden max-w-xs flex-1 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface-muted)] px-3.5 py-2 transition-colors focus-within:border-indigo-300 focus-within:bg-[var(--surface)] focus-within:ring-2 focus-within:ring-indigo-100 md:flex">
           <Search className="h-4 w-4 shrink-0 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search courses..."
-            className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
-          />
-        </div>
+          <input name="search" type="search" placeholder="Search courses..." className="w-full bg-transparent text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none" />
+        </form>
 
         {/* CTA (desktop) */}
         <a
@@ -98,7 +87,9 @@ export default function Header() {
         </a>
 
         {/* Mobile: search icon + hamburger */}
-        <div className="ml-auto flex items-center gap-1 md:hidden">
+        <div className="ml-auto flex items-center gap-1">
+          <ThemeToggle />
+          <div className="flex md:hidden">
           <button
             aria-label="Search"
             className="rounded-lg p-2 text-slate-600 hover:bg-slate-50"
@@ -117,21 +108,18 @@ export default function Header() {
               <Menu className="h-5 w-5" />
             )}
           </button>
+          </div>
         </div>
       </div>
 
       {/* Mobile panel */}
       {mobileOpen && (
-        <div className="border-t border-slate-200 bg-white px-5 py-4 md:hidden">
+        <div className="border-t border-[var(--border)] bg-[var(--surface)] px-5 py-4 md:hidden">
           {/* search */}
-          <div className="mb-4 flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-2.5">
+          <form onSubmit={handleSearch} className="mb-4 flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-2.5">
             <Search className="h-4 w-4 shrink-0 text-slate-400" />
-            <input
-              type="text"
-              placeholder="Search courses..."
-              className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none"
-            />
-          </div>
+            <input name="search" type="search" placeholder="Search courses..." className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none" />
+          </form>
 
           {/* links */}
           <nav className="flex flex-col gap-1">

@@ -6,6 +6,7 @@ export async function GET() {
   try {
     const cookieStore = await cookies();
 
+    // This endpoint exposes only the minimum session details needed by clients.
     const session = cookieStore.get("session")?.value;
 
     if (!session) {
