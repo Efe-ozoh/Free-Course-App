@@ -29,7 +29,7 @@ export default function CourseForm({ initialCourse, courseId, onSaved }: { initi
   >
 ) => {
   // All fields share one object so the payload matches the Course data model.
-  setCourse((currentCourse) => ({
+  setCourse((currentCourse: Course) => ({
     ...currentCourse,
     [event.target.name]: event.target.value,
   }));
