@@ -23,12 +23,19 @@ export default function CourseForm({ initialCourse, courseId, onSaved }: { initi
   const [error, setError] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    // All fields share one object so the payload matches the Course data model.
-    setCourse((currentCourse) => ({ ...currentCourse, [event.target.name]: event.target.value }));
-    setError("");
-    setSubmitted(false);
-  };
+ const handleChange = (
+  event: React.ChangeEvent<
+    HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+  >
+) => {
+  // All fields share one object so the payload matches the Course data model.
+  setCourse((currentCourse) => ({
+    ...currentCourse,
+    [event.target.name]: event.target.value,
+  }));
+  setError("");
+  setSubmitted(false);
+};
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
