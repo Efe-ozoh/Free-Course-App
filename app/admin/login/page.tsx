@@ -27,21 +27,27 @@ export default function Login() {
       );
 
       // Refresh the token so the server sees the latest admin custom claim.
-      const idToken = await credential.user.getIdToken(true);
+  const idToken = await credential.user.getIdToken(true);
 
-      const response = await fetch("/api/adminLogin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ idToken }),
-      });
+const response = await fetch("/api/adminLogin", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({
+    idToken,
+  }),
+});
 
-      if (!response.ok) {
-        throw new Error("Failed to create session");
-      }
+const data = await response.json();
 
-      router.replace("/admin/dashboard");
+console.log("ADMIN LOGIN RESPONSE:", response.status, data);
+
+if (!response.ok) {
+  throw new Error(data.error || "Failed to create session");
+}
+
+router.replace("/admin/dashboard");
 
     } catch (error) {
       console.error(error);
