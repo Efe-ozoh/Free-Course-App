@@ -3,9 +3,7 @@ import { getAuth } from "firebase-admin/auth";
 
 const projectId = process.env.FIREBASE_PROJECT_ID;
 const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-const privateKey =
-  process.env.NEXT_PUBLIC_FIREBASE_PRIVATE_KEY ??
-  process.env.FIREBASE_PRIVATE_KEY;
+const privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
 // Admin credentials must stay server-side; fail early if the deployment is incomplete.
 if (!projectId || !clientEmail || !privateKey) {
