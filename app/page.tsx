@@ -1,5 +1,6 @@
 import Courses from "@/components/Cards/Courses";
 
+
 export default function Home() {
   return (
     <main className="min-h-screen bg-[var(--background)] px-6 py-12 text-[var(--foreground)]">

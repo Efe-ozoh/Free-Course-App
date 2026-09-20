@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, LoaderCircle } from "lucide-react";
@@ -8,6 +8,14 @@ import CourseForm from "@/components/AdminCourse/CourseForm";
 import { getCourse, type StoredCourse } from "@/lib/courses";
 
 export default function EditCoursePage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-screen items-center justify-center bg-[var(--background)] text-sm text-[var(--muted)]"><LoaderCircle className="mr-2 animate-spin" size={17} /> Loading course...</div>}>
+      <EditCourseContent />
+    </Suspense>
+  );
+}
+
+function EditCourseContent() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [course, setCourse] = useState<StoredCourse | null>(null);
