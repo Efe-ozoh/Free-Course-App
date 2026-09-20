@@ -43,11 +43,13 @@ export async function POST(req: NextRequest) {
       success: true,
     });
   } catch (error) {
-    console.error(error);
+  console.error("ADMIN LOGIN ERROR:", error);
 
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 401 }
-    );
-  }
+  return NextResponse.json(
+    {
+      error: error instanceof Error ? error.message : "Unknown error",
+    },
+    { status: 500 }
+  );
+}
 }

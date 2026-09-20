@@ -5,7 +5,7 @@ dotenv.config({ path: ".env.local" });
 async function makeAdmin() {
   try {
     const { adminAuth } = await import("./db_firebase/firebase-admin");
-    const email = process.env.ADMIN_EMAIL;
+    const email = "ozohefe@gmail.com";
 
     if (!email) {
       throw new Error("Set ADMIN_EMAIL to the Firebase Auth user's email.");
