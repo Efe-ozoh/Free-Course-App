@@ -12,32 +12,45 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const login = async (e: React.FormEvent<HTMLFormElement>) => {
+  const login = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
 
     try {
       setLoading(true);
 
-      // Authenticate with Firebase
-      const credential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
+      /*
+       * Firebase handles email/password authentication.
+       */
+      const credential =
+        await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+
+      /*
+       * Get a fresh Firebase ID token.
+       */
+      const idToken =
+        await credential.user.getIdToken(true);
+
+      /*
+       * Send the ID token to our server.
+       */
+      const response = await fetch(
+        "/api/adminLogin",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            idToken,
+          }),
+        }
       );
-
-      // Get a fresh ID token
-      const idToken = await credential.user.getIdToken(true);
-
-      // Exchange Firebase ID token for our server session
-      const response = await fetch("/api/adminLogin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          idToken,
-        }),
-      });
 
       const data = await response.json();
 
@@ -49,12 +62,12 @@ export default function Login() {
 
       if (!response.ok) {
         throw new Error(
-          data.error || "Failed to create session"
+          data.error ||
+            "Failed to create admin session"
         );
       }
 
       router.replace("/admin/dashboard");
-
     } catch (error) {
       console.error("LOGIN ERROR:", error);
 
@@ -83,7 +96,9 @@ export default function Login() {
           placeholder="Email"
           className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-[var(--foreground)] outline-none focus:border-[#e37445]"
           value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          onChange={(e) =>
+            setEmail(e.target.value)
+          }
           required
         />
 
@@ -92,7 +107,9 @@ export default function Login() {
           placeholder="Password"
           className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3 text-[var(--foreground)] outline-none focus:border-[#e37445]"
           value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          onChange={(e) =>
+            setPassword(e.target.value)
+          }
           required
         />
 
@@ -101,7 +118,9 @@ export default function Login() {
           disabled={loading}
           className="w-full rounded-xl bg-[#e37445] p-3 font-bold text-white transition hover:bg-[#c95e32] disabled:opacity-50"
         >
-          {loading ? "Signing in..." : "Login"}
+          {loading
+            ? "Signing in..."
+            : "Login"}
         </button>
       </form>
     </div>
