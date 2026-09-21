@@ -5,22 +5,26 @@ const projectId = process.env.FIREBASE_PROJECT_ID;
 const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
 const privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
-console.log("FIREBASE ADMIN ENV CHECK", {
+if (!projectId || !clientEmail || !privateKey) {
+  throw new Error("Missing Firebase Admin environment variables.");
+}
+
+const formattedPrivateKey = privateKey
+  .replace(/\\n/g, "\n")
+  .replace(/\r/g, "");
+
+console.log("FIREBASE ADMIN CHECK", {
   projectId,
   clientEmail,
-  privateKeyExists: !!privateKey,
-  privateKeyLength: privateKey?.length,
-  startsCorrectly: privateKey?.startsWith(
+  privateKeyLength: formattedPrivateKey.length,
+  startsWithBegin: formattedPrivateKey.startsWith(
     "-----BEGIN PRIVATE KEY-----"
   ),
-  containsLiteralNewline: privateKey?.includes("\\n"),
+  endsWithEnd: formattedPrivateKey.trim().endsWith(
+    "-----END PRIVATE KEY-----"
+  ),
+  newlineCount: (formattedPrivateKey.match(/\n/g) || []).length,
 });
-
-if (!projectId || !clientEmail || !privateKey) {
-  throw new Error(
-    "Missing Firebase Admin environment variables."
-  );
-}
 
 const adminApp =
   getApps().length > 0
@@ -29,7 +33,7 @@ const adminApp =
         credential: cert({
           projectId,
           clientEmail,
-          privateKey: privateKey.replace(/\\n/g, "\n"),
+          privateKey: formattedPrivateKey,
         }),
       });
 
