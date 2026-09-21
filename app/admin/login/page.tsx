@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -19,39 +18,51 @@ export default function Login() {
     try {
       setLoading(true);
 
-      // Firebase authenticates the credentials; the API then exchanges the ID token for an httpOnly session cookie.
+      // Authenticate with Firebase
       const credential = await signInWithEmailAndPassword(
         auth,
         email,
         password
       );
 
-      // Refresh the token so the server sees the latest admin custom claim.
-  const idToken = await credential.user.getIdToken(true);
+      // Get a fresh ID token
+      const idToken = await credential.user.getIdToken(true);
 
-const response = await fetch("/api/adminLogin", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    idToken,
-  }),
-});
+      // Exchange Firebase ID token for our server session
+      const response = await fetch("/api/adminLogin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          idToken,
+        }),
+      });
 
-const data = await response.json();
+      const data = await response.json();
 
-console.log("ADMIN LOGIN RESPONSE:", response.status, data);
+      console.log(
+        "ADMIN LOGIN RESPONSE:",
+        response.status,
+        data
+      );
 
-if (!response.ok) {
-  throw new Error(data.error || "Failed to create session");
-}
+      if (!response.ok) {
+        throw new Error(
+          data.error || "Failed to create session"
+        );
+      }
 
-router.replace("/admin/dashboard");
+      router.replace("/admin/dashboard");
 
     } catch (error) {
-      console.error(error);
-      alert("Invalid email or password");
+      console.error("LOGIN ERROR:", error);
+
+      alert(
+        error instanceof Error
+          ? error.message
+          : "Login failed"
+      );
     } finally {
       setLoading(false);
     }
@@ -86,6 +97,7 @@ router.replace("/admin/dashboard");
         />
 
         <button
+          type="submit"
           disabled={loading}
           className="w-full rounded-xl bg-[#e37445] p-3 font-bold text-white transition hover:bg-[#c95e32] disabled:opacity-50"
         >
@@ -95,4 +107,3 @@ router.replace("/admin/dashboard");
     </div>
   );
 }
-

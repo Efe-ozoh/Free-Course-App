@@ -12,44 +12,57 @@ export async function POST(req: NextRequest) {
         { status: 400 }
       );
     }
-    
-    // Verify both the Firebase token and the custom admin claim before creating a session.
+
+    // Verify that the token was issued by Firebase
     const decodedToken = await adminAuth.verifyIdToken(idToken);
 
-    if (decodedToken.admin !== true) {
+    const adminUid = process.env.ADMIN_UID;
+
+    if (!adminUid) {
+      throw new Error("ADMIN_UID is not configured");
+    }
+
+    // Check whether this Firebase account is the admin
+    if (decodedToken.uid !== adminUid) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 403 }
       );
     }
 
-    const expiresIn = 60 * 60 * 24 * 5 * 1000; // Keep the server session valid for five days.
+    // Create a 5-day session
+    const expiresIn = 1000 * 60 * 60 * 24 * 5;
 
-    const sessionCookie = await adminAuth.createSessionCookie(idToken, {
-      expiresIn,
-    });
+    const sessionCookie = await adminAuth.createSessionCookie(
+      idToken,
+      { expiresIn }
+    );
 
     const cookieStore = await cookies();
 
     cookieStore.set("session", sessionCookie, {
-      maxAge: expiresIn / 1000,
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure: true,
       sameSite: "lax",
       path: "/",
+      maxAge: expiresIn / 1000,
     });
 
     return NextResponse.json({
       success: true,
     });
-  } catch (error) {
-  console.error("ADMIN LOGIN ERROR:", error);
 
-  return NextResponse.json(
-    {
-      error: error instanceof Error ? error.message : "Unknown error",
-    },
-    { status: 500 }
-  );
-}
+  } catch (error) {
+    console.error("ADMIN LOGIN ERROR:", error);
+
+    return NextResponse.json(
+      {
+        error:
+          error instanceof Error
+            ? error.message
+            : "Authentication failed",
+      },
+      { status: 500 }
+    );
+  }
 }

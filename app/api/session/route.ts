@@ -6,7 +6,6 @@ export async function GET() {
   try {
     const cookieStore = await cookies();
 
-    // This endpoint exposes only the minimum session details needed by clients.
     const session = cookieStore.get("session")?.value;
 
     if (!session) {
@@ -21,12 +20,24 @@ export async function GET() {
       true
     );
 
+    const adminUid = process.env.ADMIN_UID;
+
+    if (!adminUid || decoded.uid !== adminUid) {
+      return NextResponse.json(
+        { authenticated: false },
+        { status: 403 }
+      );
+    }
+
     return NextResponse.json({
       authenticated: true,
       uid: decoded.uid,
-      email: decoded.email,
+      email: decoded.email ?? null,
     });
+
   } catch (error) {
+    console.error("SESSION VERIFICATION ERROR:", error);
+
     return NextResponse.json(
       { authenticated: false },
       { status: 401 }
