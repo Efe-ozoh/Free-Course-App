@@ -1,10 +1,14 @@
 import { Suspense } from "react";
+import Footer from "@/components/Footer/Footer";
 import CourseDetailsClient from "./CourseDetailsClient";
 
 export default function CourseDetailsPage() {
   return (
-    <Suspense fallback={<p>Loading course details...</p>}>
-      <CourseDetailsClient />
-    </Suspense>
+    <>
+      <Suspense fallback={<p>Loading course details...</p>}>
+        <CourseDetailsClient />
+      </Suspense>
+      <Footer />
+    </>
   );
 }

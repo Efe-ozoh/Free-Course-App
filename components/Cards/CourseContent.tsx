@@ -6,6 +6,17 @@ import { useSearchParams } from "next/navigation";
 import CourseCard from "./CourseCard";
 import { getCourses, type StoredCourse } from "@/lib/courses";
 
+function shuffleCourses(courses: StoredCourse[]) {
+    const shuffledCourses = [...courses];
+
+    for (let index = shuffledCourses.length - 1; index > 0; index -= 1) {
+        const randomIndex = Math.floor(Math.random() * (index + 1));
+        [shuffledCourses[index], shuffledCourses[randomIndex]] = [shuffledCourses[randomIndex], shuffledCourses[index]];
+    }
+
+    return shuffledCourses;
+}
+
 export default function CourseContent() {
     const searchParams = useSearchParams();
     const [courses, setCourses] = useState<StoredCourse[]>([]);
@@ -22,7 +33,7 @@ export default function CourseContent() {
     useEffect(() => {
         // Load the full library once; search and category filtering stay local and responsive.
         getCourses()
-            .then(setCourses)
+            .then((loadedCourses) => setCourses(shuffleCourses(loadedCourses)))
             .catch((loadError) => {
                 console.error("Failed to load courses:", loadError);
                 setError(true);
