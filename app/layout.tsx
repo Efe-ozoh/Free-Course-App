@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Eduliver-Get online courses for free",
-  description: "Best Free Online Courses You Can Find",
+  title: "Eduliver - Get Online Courses for Free",
+  description: "Best Free Online Courses You Can Find including Udemy, Coursera, and more. Learn new skills and advance your career with our curated selection of free online courses.",
   icons: {
     icon: "/logo.png",
   },
