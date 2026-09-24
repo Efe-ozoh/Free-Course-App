@@ -17,7 +17,7 @@ export default function CourseOverview({ course }: { course: StoredCourse }) {
           <div className="flex items-center gap-3"><BookOpen className="text-indigo-500" size={18} /> Curated tutorial content</div>
           <div className="flex items-center gap-3"><Tag className="text-orange-500" size={18} /> {course.category}</div>
         </div>
-        <a href={course.link} target="_blank" rel="noreferrer" className="mt-7 flex items-center justify-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-bold text-indigo-700 hover:bg-indigo-100">Open course link <ExternalLink size={15} /></a>
+        <a href={`/api/redirect?courseId=${course.id}`} target="_blank" rel="nofollow noopener noreferrer" className="mt-7 flex items-center justify-center gap-2 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm font-bold text-indigo-700 hover:bg-indigo-100">Open course link <ExternalLink size={15} /></a>
       </aside>
     </div>
   );

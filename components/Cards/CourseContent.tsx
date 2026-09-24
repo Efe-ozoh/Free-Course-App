@@ -80,7 +80,7 @@ export default function CourseContent() {
             {filteredCourses.length === 0 ? (
                 <div className="col-span-full py-16 text-center text-sm text-slate-400">No courses match your search or category.</div>
             ) : filteredCourses.map((course) => (
-                <CourseCard key={course.id} category={course.category} title={course.title} image={course.image} href={`/CourseDetails?id=${course.id}`} />
+                <CourseCard key={course.id} category={course.category} title={course.title} image={course.image} href={`/course/${course.id}`} />
             ))}
         </>
     );

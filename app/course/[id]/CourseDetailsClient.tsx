@@ -11,10 +11,10 @@ import RelatedCourses from "@/components/CourseDetails/RelatedCourses";
 
 type CourseWithId = StoredCourse;
 
-export default function CourseDetailsClient() {
+export default function CourseDetailsClient({ initialCourse }: { initialCourse?: CourseWithId }) {
   const searchParams = useSearchParams();
   const courseId = searchParams.get("id");
-  const [course, setCourse] = useState<CourseWithId | null>(null);
+  const [course, setCourse] = useState<CourseWithId | null>(initialCourse ?? null);
   const [relatedCourses, setRelatedCourses] = useState<StoredCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -24,7 +24,27 @@ export default function CourseDetailsClient() {
     setError(false);
     setRelatedCourses([]);
 
-    // The detail route receives the Firebase record ID as ?id=...
+    if (initialCourse) {
+      setCourse(initialCourse);
+      getCourses()
+        .then((courses) => {
+          setRelatedCourses(
+            courses
+              .filter(
+                (candidate) =>
+                  candidate.id !== initialCourse.id &&
+                  candidate.published !== false &&
+                  candidate.category === initialCourse.category,
+              )
+              .slice(0, 4),
+          );
+        })
+        .catch((loadError) => console.error("Failed to load related courses:", loadError))
+        .finally(() => setLoading(false));
+      return;
+    }
+
+    // The legacy detail route receives the Firebase record ID as ?id=...
     if (!courseId) {
       setCourse(null);
       setLoading(false);

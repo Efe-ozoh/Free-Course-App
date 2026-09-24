@@ -35,7 +35,7 @@ export default function CourseList({ courses, onDelete }: CourseListProps) {
           </div>
           <div className="flex gap-2">
             <Link href={`/admin/edit_course/${course.id}`} aria-label={`Edit ${course.title}`} className="flex items-center justify-center rounded-lg border border-[var(--border)] p-2 text-[var(--muted)] transition hover:border-[#e37445] hover:text-[#c95e32]"><Pencil size={17} /></Link>
-            <Link href={`/CourseDetails?id=${course.id}`} className="rounded-lg border border-[#dfe8e3] px-3 py-2 text-sm font-bold text-[#48625a] transition hover:border-[#e37445] hover:text-[#c95e32]">View</Link>
+            <Link href={`/course/${course.id}`} className="rounded-lg border border-[#dfe8e3] px-3 py-2 text-sm font-bold text-[#48625a] transition hover:border-[#e37445] hover:text-[#c95e32]">View</Link>
             <button type="button" onClick={() => onDelete(course.id)} aria-label={`Delete ${course.title}`} className="flex items-center justify-center rounded-lg border border-[#f3d8d0] p-2 text-[#d06443] transition hover:bg-[#fff0e9]"><Trash2 size={17} /></button>
           </div>
         </div>

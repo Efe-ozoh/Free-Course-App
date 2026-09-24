@@ -15,6 +15,7 @@ export interface Course {
   description1: string;
   description2?: string;
   link: string;
+  platform?: string;
   category: string;
   level?: "Beginner" | "Intermediate" | "Advanced";
   tags?: string;

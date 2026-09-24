@@ -20,7 +20,7 @@ export default function RelatedCourses({ courses, category }: { courses: StoredC
             category={course.category}
             title={course.title}
             image={course.image}
-            href={`/CourseDetails?id=${course.id}`}
+              href={`/course/${course.id}`}
           />
         ))}
       </div>

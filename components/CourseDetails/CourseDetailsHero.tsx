@@ -20,7 +20,7 @@ export default function CourseDetailsHero({ course }: { course: StoredCourse }) 
             <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-indigo-300"><Tag size={14} /> {course.category}</div>
             <h1 className="mt-5 max-w-2xl text-3xl font-black leading-tight tracking-tight sm:text-5xl">{course.title}</h1>
             <p className="mt-5 max-w-xl text-base leading-7 text-slate-300">{course.description1}</p>
-            <a href={course.link} target="_blank" rel="noreferrer" className="mt-8 inline-flex w-fit items-center gap-2 rounded-xl bg-indigo-500 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-indigo-400">Start learning <ArrowUpRight size={17} /></a>
+            <a href={`/api/redirect?courseId=${course.id}`} target="_blank" rel="nofollow noopener noreferrer" className="mt-8 inline-flex w-fit items-center gap-2 rounded-xl bg-indigo-500 px-5 py-3.5 text-sm font-bold text-white transition hover:bg-indigo-400">Start learning <ArrowUpRight size={17} /></a>
           </div>
         </div>
       </section>
