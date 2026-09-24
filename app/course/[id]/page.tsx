@@ -8,7 +8,7 @@ type CoursePageProps = {
   params: Promise<{ id: string }>;
 };
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
 function getCourseDescription(course: Awaited<ReturnType<typeof getCourse>>) {
   if (!course) return "";
