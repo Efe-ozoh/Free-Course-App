@@ -5,8 +5,7 @@ export function getAffiliateUrl(platform: string | undefined, rawUrl: string): s
 
   // Replace these domains with the approved Impact.com account links when available.
   const templates: Record<string, string> = {
-    coursera: `https://pxf.io${encodedUrl}`,
-    udemy: `https://sjv.io${encodedUrl}`,
+    udem: `https://sjv.io${encodedUrl}`,
   };
 
   const platformKey = platform?.toLowerCase() || "";

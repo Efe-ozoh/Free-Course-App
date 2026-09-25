@@ -5,8 +5,8 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'freecoursesites.com',
-        pathname: '/wp-content/uploads/**',
+        hostname: 'images.unsplash.com',
+        pathname: '/**',
       },
     ],
   },

@@ -12,6 +12,8 @@ import {
 export interface Course {
   title: string;
   image: string;
+  /** Legacy importer field; normalized to `image` when records are read. */
+  imageUrl?: string;
   description1: string;
   description2?: string;
   link: string;
@@ -47,11 +49,16 @@ export async function getCourses(): Promise<StoredCourse[]> {
 
   const data = snapshot.val();
 
-  return Object.entries(data).map(([id, value]) => ({
-    id,
-    ...(value as Course),
-    published: (value as Course).published ?? true,
-  }));
+  return Object.entries(data).map(([id, value]) => {
+    const course = value as Course;
+
+    return {
+      id,
+      ...course,
+      image: course.image || course.imageUrl || "",
+      published: course.published ?? true,
+    };
+  });
 }
 
 export async function getCourse(id: string): Promise<StoredCourse | null> {
@@ -59,10 +66,13 @@ export async function getCourse(id: string): Promise<StoredCourse | null> {
 
   if (!snapshot.exists()) return null;
 
+  const course = snapshot.val() as Course;
+
   return {
     id,
-    ...(snapshot.val() as Course),
-    published: (snapshot.val() as Course).published ?? true,
+    ...course,
+    image: course.image || course.imageUrl || "",
+    published: course.published ?? true,
   };
 }
 
