@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import CourseCard from "./CourseCard";
@@ -19,7 +19,6 @@ export default function CourseContent({ initialCourses }: { initialCourses: Stor
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
-    const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const [courses, setCourses] = useState<StoredCourse[]>(initialCourses);
     const [searchInput, setSearchInput] = useState(searchParams.get("search") ?? "");
@@ -28,12 +27,11 @@ export default function CourseContent({ initialCourses }: { initialCourses: Stor
         setCourses(shuffleCourses(initialCourses));
     }, [initialCourses]);
 
-    useEffect(() => {
-        setSearchInput(searchParams.get("search") ?? "");
-    }, [searchParams]);
-
+    
     const search = searchParams.get("search") ?? "";
     const category = searchParams.get("category") ?? "All categories";
+    const categories = Array.from(new Set(courses.map((course) => course.category).filter(Boolean))).sort();
+    const normalizedCategory = categories.includes(category) ? category : "All categories";
 
     const updateSearchParam = (key: string, value: string, method: "push" | "replace") => {
         const params = new URLSearchParams(searchParams.toString());
@@ -48,27 +46,14 @@ export default function CourseContent({ initialCourses }: { initialCourses: Stor
         router[method](query ? `${pathname}?${query}` : pathname, { scroll: false });
     };
 
-    useEffect(() => {
-        if (searchTimeoutRef.current) {
-            clearTimeout(searchTimeoutRef.current);
-        }
-
-        searchTimeoutRef.current = setTimeout(() => {
-            updateSearchParam("search", searchInput.trim(), "replace");
-        }, 250);
-
-        return () => {
-            if (searchTimeoutRef.current) {
-                clearTimeout(searchTimeoutRef.current);
-            }
-        };
-    }, [searchInput]);
+    const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        updateSearchParam("search", searchInput.trim(), "replace");
+    };
 
     const handleCategoryChange = (newCategory: string) => {
         updateSearchParam("category", newCategory === "All categories" ? "" : newCategory, "push");
     };
-
-    const categories = Array.from(new Set(courses.map((course) => course.category).filter(Boolean))).sort();
 
     // Dynamic filtering stays local so results update immediately.
     const filteredCourses = courses.filter((course) => {
@@ -81,7 +66,7 @@ export default function CourseContent({ initialCourses }: { initialCourses: Stor
             course.tags
         ].some((value) => value?.toLowerCase().includes(searchText));
         
-        const matchesCategory = category === "All categories" || course.category === category;
+        const matchesCategory = normalizedCategory === "All categories" || course.category === normalizedCategory;
         
         return matchesSearch && matchesCategory && course.published !== false;
     });
@@ -93,17 +78,27 @@ export default function CourseContent({ initialCourses }: { initialCourses: Stor
                     <div>
                         <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--muted)]">Search the library or narrow it down by category.</p>
                     </div>
-                    <div className="flex w-full justify-end sm:w-auto">
-                       
+                    <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+                        <form onSubmit={handleSearchSubmit} className="relative w-full sm:w-64">
+                            <Search className="pointer-events-none absolute left-4 top-3.5 h-4 w-4 text-[var(--muted)]" />
+                            <input
+                                type="search"
+                                aria-label="Search courses"
+                                placeholder="Search courses"
+                                value={searchInput}
+                                onChange={(event) => setSearchInput(event.target.value)}
+                                className="w-full rounded-xl border border-[var(--border)] bg-[var(--surface)] py-3 pl-11 pr-4 text-sm text-[var(--foreground)] outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
+                            />
+                        </form>
                         <label className="relative w-full sm:w-52">
                             <SlidersHorizontal className="pointer-events-none absolute left-4 top-3.5 h-4 w-4 text-[var(--muted)]" />
-                            <select 
-                                value={category} 
-                                onChange={(event) => handleCategoryChange(event.target.value)} 
+                            <select
+                                value={normalizedCategory}
+                                onChange={(event) => handleCategoryChange(event.target.value)}
                                 className="w-full appearance-none rounded-xl border border-[var(--border)] bg-[var(--surface)] py-3 pl-11 pr-4 text-sm text-[var(--foreground)] outline-none focus:border-indigo-400 focus:ring-2 focus:ring-indigo-400/20"
                             >
-                                <option>All categories</option>
-                                {categories.map((item) => <option key={item}>{item}</option>)}
+                                <option value="All categories">All categories</option>
+                                {categories.map((item) => <option key={item} value={item}>{item}</option>)}
                             </select>
                         </label>
                     </div>
