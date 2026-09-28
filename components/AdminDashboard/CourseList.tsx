@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { BookOpen, Pencil, Trash2 } from "lucide-react";
 import type { StoredCourse } from "@/lib/courses";
-import CourseImage from "@/components/Cards/CourseImage";
+import CourseImage from "@/components/courses/CourseImage";
 
 type CourseListProps = {
   courses: StoredCourse[];

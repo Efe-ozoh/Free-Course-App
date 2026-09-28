@@ -1,6 +1,6 @@
 // app/sitemap.ts
 import type { MetadataRoute } from 'next';
-import { getCourses } from '@/lib/courses';
+import { getCourses } from '@/lib/courses-server';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://eduliver.com";
 

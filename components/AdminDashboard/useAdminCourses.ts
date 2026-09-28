@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { deleteCourse, getCourses, type StoredCourse } from "@/lib/courses";
+import { deleteCourse, getCourses } from "@/lib/courses-client";
+import { revalidateCoursesCache } from "@/app/actions/courses";
+import type { StoredCourse } from "@/lib/courses";
 
 export function useAdminCourses() {
   const [courses, setCourses] = useState<StoredCourse[]>([]);
@@ -30,6 +32,7 @@ export function useAdminCourses() {
 
     try {
       await deleteCourse(id);
+      await revalidateCoursesCache();
       await loadCourses();
     } catch (error) {
       console.error("Failed to delete course:", error);

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getCourse } from "@/lib/courses";
+import { getCourse } from "@/lib/courses-server";
 import { getAffiliateUrl } from "@/utils/affiliate";
 
 export async function GET(request: Request) {

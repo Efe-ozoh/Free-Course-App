@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Footer from "@/components/Footer/Footer";
 import CourseDetailsClient from "@/app/course/[id]/CourseDetailsClient";
-import { getCourse } from "@/lib/courses";
+import { getCourse } from "@/lib/courses-server";
 
 type CoursePageProps = {
   params: Promise<{ id: string }>;

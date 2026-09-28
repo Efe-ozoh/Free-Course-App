@@ -5,7 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, LoaderCircle } from "lucide-react";
 import CourseForm from "@/components/AdminCourse/CourseForm";
-import { getCourse, type StoredCourse } from "@/lib/courses";
+import { getCourse } from "@/lib/courses-client";
+import type { StoredCourse } from "@/lib/courses";
 
 export default function EditCoursePage() {
   return (

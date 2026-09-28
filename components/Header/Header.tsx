@@ -76,15 +76,11 @@ export default function Header() {
         <form onSubmit={handleSearch} className="ml-auto hidden max-w-xs flex-1 items-center gap-2 rounded-full border border-[var(--border)] bg-[var(--surface-muted)] px-3.5 py-2 transition-colors focus-within:border-indigo-300 focus-within:bg-[var(--surface)] focus-within:ring-2 focus-within:ring-indigo-100 md:flex">
           <Search className="h-4 w-4 shrink-0 text-slate-400" />
           <input name="search" type="search" placeholder="Search courses..." className="w-full bg-transparent text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none" />
+       <button type="submit" className="bg-indigo-600 text-white px-4 py-1 rounded-full">Search</button>
         </form>
 
-        {/* CTA (desktop) */}
-        <a
-          href="#get-started"
-          className="hidden shrink-0 rounded-full bg-indigo-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 md:inline-block"
-        >
-          Get Started
-        </a>
+      
+    
 
         {/* Mobile: search icon + hamburger */}
         <div className="ml-auto flex items-center gap-1">
@@ -133,13 +129,6 @@ export default function Header() {
               </a>
             ))}
           </nav>
-
-          <a
-            href="#get-started"
-            className="mt-4 block rounded-full bg-indigo-600 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-indigo-700"
-          >
-            Get Started
-          </a>
         </div>
       )}
     </header>

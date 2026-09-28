@@ -1,5 +1,5 @@
 import type { StoredCourse } from "@/lib/courses";
-import CourseCard from "@/components/Cards/CourseCard";
+import CourseCard from "@/components/courses/CourseCard";
 
 export default function RelatedCourses({ courses, category }: { courses: StoredCourse[]; category: string }) {
   if (courses.length === 0) return null;

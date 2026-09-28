@@ -1,4 +1,4 @@
-import Courses from "@/components/Cards/Courses";
+import Courses from "@/components/courses/Courses";
 import Footer from "@/components/Footer/Footer";
 
 

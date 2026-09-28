@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowUpRight, Tag } from "lucide-react";
 import Link from "next/link";
 import type { StoredCourse } from "@/lib/courses";
-import CourseImage from "@/components/Cards/CourseImage";
+import CourseImage from "@/components/courses/CourseImage";
 
 export default function CourseDetailsHero({ course }: { course: StoredCourse }) {
   return (
