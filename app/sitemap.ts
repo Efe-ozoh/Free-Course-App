@@ -1,14 +1,14 @@
 // app/sitemap.ts
 import type { MetadataRoute } from 'next';
-import { getCourses } from '@/lib/courses-server';
+import { getAllCourses } from '@/lib/courses-server';
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://eduliver.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // 1. Fetch all courses from your Cloudflare-safe Firebase utility
-  let courses: Awaited<ReturnType<typeof getCourses>> = [];
+  let courses: Awaited<ReturnType<typeof getAllCourses>> = [];
   try {
-    courses = await getCourses();
+    courses = await getAllCourses();
   } catch (error) {
     console.error("Sitemap build database error:", error);
   }

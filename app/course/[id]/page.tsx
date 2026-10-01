@@ -50,32 +50,8 @@ export default async function CourseDetailPage({ params }: CoursePageProps) {
 
   if (!course) notFound();
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Course",
-    name: course.title,
-    description: getCourseDescription(course),
-    provider: {
-      "@type": "Organization",
-      name: "Eduliver",
-      url: siteUrl,
-    },
-    offers: {
-      "@type": "Offer",
-      price: "0.00",
-      priceCurrency: "USD",
-      category: "Free Education",
-    },
-  };
-
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
-        }}
-      />
       <CourseDetailsClient initialCourse={course} />
       <Footer />
     </>
