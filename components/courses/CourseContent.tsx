@@ -15,22 +15,19 @@ function shuffleCourses(courses: StoredCourse[]) {
     return shuffledCourses;
 }
 
-export default function CourseContent({ initialCourses, hasMore: initialHasMore }: { initialCourses: StoredCourse[]; hasMore: boolean }) {
+export default function CourseContent({ initialCourses }: { initialCourses: StoredCourse[] }) {
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
 
     const [courses, setCourses] = useState<StoredCourse[]>(initialCourses);
     const [visibleCount, setVisibleCount] = useState(Math.min(initialCourses.length, 12));
-    const [hasMore, setHasMore] = useState(initialHasMore);
-    const [isLoadingMore, setIsLoadingMore] = useState(false);
     const [searchInput, setSearchInput] = useState(searchParams.get("search") ?? "");
 
     useEffect(() => {
         setCourses(shuffleCourses(initialCourses));
         setVisibleCount(Math.min(initialCourses.length, 12));
-        setHasMore(initialHasMore);
-    }, [initialCourses, initialHasMore]);
+    }, [initialCourses]);
 
     
     const search = searchParams.get("search") ?? "";
@@ -60,28 +57,8 @@ export default function CourseContent({ initialCourses, hasMore: initialHasMore 
         updateSearchParam("category", newCategory === "All categories" ? "" : newCategory, "push");
     };
 
-    const handleLoadMore = async () => {
-        setIsLoadingMore(true);
-
-        try {
-            const response = await fetch(`/api/courses?offset=${visibleCount}&limit=12`);
-            const data = await response.json();
-            const nextCourses = Array.isArray(data.courses) ? data.courses : [];
-            const nextHasMore = Boolean(data.hasMore);
-
-            if (nextCourses.length > 0) {
-                setCourses((existingCourses) => {
-                    const existingIds = new Set(existingCourses.map((course) => course.id));
-                    const uniqueCourses = nextCourses.filter((course: StoredCourse) => !existingIds.has(course.id));
-                    return [...existingCourses, ...uniqueCourses];
-                });
-                setVisibleCount((currentValue) => currentValue + nextCourses.length);
-            }
-
-            setHasMore(nextHasMore);
-        } finally {
-            setIsLoadingMore(false);
-        }
+    const handleLoadMore = () => {
+        setVisibleCount((currentValue) => currentValue + 12);
     };
 
     // Dynamic filtering stays local so results update immediately.
@@ -101,7 +78,7 @@ export default function CourseContent({ initialCourses, hasMore: initialHasMore 
     });
 
     const visibleCourses = filteredCourses.slice(0, visibleCount);
-    const hasMoreCourses = hasMore || filteredCourses.length > visibleCourses.length;
+    const hasMoreCourses = filteredCourses.length > visibleCourses.length;
 
     return (
         <>
@@ -155,10 +132,9 @@ export default function CourseContent({ initialCourses, hasMore: initialHasMore 
                             <button
                                 type="button"
                                 onClick={handleLoadMore}
-                                disabled={isLoadingMore}
                                 className="rounded-full border border-[var(--border)] bg-[var(--surface)] px-5 py-2.5 text-sm font-medium text-[var(--foreground)] transition hover:border-indigo-400 hover:text-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                                {isLoadingMore ? "Loading more..." : "Load more"}
+                                Load more
                             </button>
                         </div>
                     )}

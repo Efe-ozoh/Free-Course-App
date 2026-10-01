@@ -1,19 +1,12 @@
 import { Suspense } from "react";
-import { getAllCourses, getCourses } from "@/lib/courses-server";
+import { getAllCourses } from "@/lib/courses-server";
 import CourseContent from "./CourseContent";
 
 export default async function Courses() {
     let courses;
-    let hasMore = false;
 
     try {
-        const [initialCourses, allCourses] = await Promise.all([
-            getCourses(12),
-            getAllCourses(),
-        ]);
-
-        courses = initialCourses;
-        hasMore = allCourses.length > initialCourses.length;
+        courses = await getAllCourses();
     } catch (error) {
         console.error("Failed to load courses:", error);
         return <p className="col-span-full py-16 text-center text-sm text-rose-500">Unable to load courses. Please refresh and try again.</p>;
@@ -32,7 +25,7 @@ export default async function Courses() {
                 </div>
             }
         >
-            <CourseContent initialCourses={courses} hasMore={hasMore} />
+            <CourseContent initialCourses={courses} />
         </Suspense>
     );
 }
