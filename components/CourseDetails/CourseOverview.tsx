@@ -3,8 +3,8 @@ import type { StoredCourse } from "@/lib/courses";
 
 export default function CourseOverview({ course }: { course: StoredCourse }) {
   return (
-    <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_320px]">
-      <article className="rounded-2xl border border-slate-200 bg-white p-7 sm:p-9">
+    <div className="mt-8 grid gap-4 lg:grid-cols-[1fr_320px]">
+      <article className="rounded-2xl border border-slate-200 bg-white p-7 sm:py-9">
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-600">About this course</p>
         <h2 className="mt-3 text-2xl font-black tracking-tight">Build useful skills with a clear direction.</h2>
         <p className="mt-5 whitespace-pre-line text-[15px] leading-8 text-slate-600">{course.description1}</p>

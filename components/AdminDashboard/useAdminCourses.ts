@@ -32,7 +32,7 @@ export function useAdminCourses() {
 
     try {
       await deleteCourse(id);
-      await revalidateCoursesCache();
+      await revalidateCoursesCache(id);
       await loadCourses();
     } catch (error) {
       console.error("Failed to delete course:", error);

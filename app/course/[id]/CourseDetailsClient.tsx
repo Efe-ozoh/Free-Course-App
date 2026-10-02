@@ -17,11 +17,10 @@ export default function CourseDetailsClient({ initialCourse }: { initialCourse?:
   const courseId = searchParams.get("id");
   const [course, setCourse] = useState<CourseWithId | null>(initialCourse ?? null);
   const [relatedCourses, setRelatedCourses] = useState<StoredCourse[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!initialCourse);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
     setError(false);
     setRelatedCourses([]);
 
@@ -44,6 +43,8 @@ export default function CourseDetailsClient({ initialCourse }: { initialCourse?:
         .finally(() => setLoading(false));
       return;
     }
+
+    setLoading(true);
 
     // The legacy detail route receives the Firebase record ID as ?id=...
     if (!courseId) {
@@ -106,7 +107,7 @@ export default function CourseDetailsClient({ initialCourse }: { initialCourse?:
 
   return (
     <main className="min-h-screen bg-[#f7f8fc] pb-16 text-slate-900">
-      <div className="mx-auto w-[80%] px-0 py-8 sm:py-8 lg:py-12">
+      <div className="mx-auto w-full px-4 py-8 sm:w-[90%] sm:px-0 lg:w-[80%] lg:py-12">
         <CourseDetailsHero course={course} />
         <CourseOverview course={course} />
         <RelatedCourses courses={relatedCourses} category={course.category} />

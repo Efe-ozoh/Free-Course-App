@@ -33,8 +33,8 @@ export async function getCourses(): Promise<StoredCourse[]> {
     const course = value as Course;
 
     return {
-      id,
       ...course,
+      id,
       image: course.image || course.imageUrl || "",
       published: course.published ?? true,
     };
@@ -49,8 +49,8 @@ export async function getCourse(id: string): Promise<StoredCourse | null> {
   const course = snapshot.val() as Course;
 
   return {
-    id,
     ...course,
+    id,
     image: course.image || course.imageUrl || "",
     published: course.published ?? true,
   };

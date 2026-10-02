@@ -8,8 +8,8 @@ const normalizeCourse = (id: string, value: unknown): StoredCourse => {
   const course = value as Course;
 
   return {
-    id,
     ...course,
+    id,
     image: course.image || course.imageUrl || "",
     published: course.published ?? true,
   };
@@ -65,16 +65,17 @@ export async function getAllCourses(): Promise<StoredCourse[]> {
 }
 
 export async function getCourse(id: string): Promise<StoredCourse | null> {
-  const snapshot = await get(ref(db, `courses/${id}`));
+  const getCachedCourse = unstable_cache(
+    async (): Promise<StoredCourse | null> => {
+      const snapshot = await get(ref(db, `courses/${id}`));
 
-  if (!snapshot.exists()) return null;
+      if (!snapshot.exists()) return null;
 
-  const course = snapshot.val() as Course;
+      return normalizeCourse(id, snapshot.val());
+    },
+    ["course", id],
+    { revalidate: 3600, tags: [`course:${id}`] },
+  );
 
-  return {
-    id,
-    ...course,
-    image: course.image || course.imageUrl || "",
-    published: course.published ?? true,
-  };
+  return getCachedCourse();
 }

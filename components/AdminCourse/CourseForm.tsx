@@ -56,13 +56,15 @@ export default function CourseForm({ initialCourse, courseId, onSaved }: { initi
 
     setLoading(true);
     try {
+      let changedCourseId = courseId;
+
       if (courseId) {
         await updateCourse(courseId, trimmedCourse);
       } else {
-        await addCourse(trimmedCourse);
+        changedCourseId = (await addCourse(trimmedCourse)) ?? undefined;
         setCourse(emptyCourse);
       }
-      await revalidateCoursesCache();
+      await revalidateCoursesCache(changedCourseId);
       setSubmitted(true);
       onSaved?.();
     } catch (error) {
