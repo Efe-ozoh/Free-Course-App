@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Link from "next/link";
 import CourseImage from "./CourseImage";
 
 interface CourseCardProps {
@@ -8,6 +9,7 @@ interface CourseCardProps {
   title: string;
   image?: string;
   href?: string;
+  prefetch?: boolean;
 }
 
 export default function CourseCard({
@@ -15,15 +17,16 @@ export default function CourseCard({
   title,
   image,
   href = "#",
+  prefetch = false,
 }: CourseCardProps) {
   // The whole card is a link so browsing a course does not require a separate button.
   return (
-    <motion.a
-      href={href}
-      whileHover={{ y: -4 }}
-      transition={{ type: "spring", stiffness: 300, damping: 24 }}
-      className="group block w-full max-w-sm overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-lg shadow-black/10"
-    >
+    <Link href={href} prefetch={prefetch} className="block w-full">
+      <motion.div
+        whileHover={{ y: -4 }}
+        transition={{ type: "spring", stiffness: 300, damping: 24 }}
+        className="group block w-full max-w-sm overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--surface)] shadow-lg shadow-black/10"
+      >
       {/* Collage header */}
       <div className="relative h-44 w-full overflow-hidden bg-gradient-to-br from-[#1b2038] via-[#141726] to-[#0d0f18]">
         <CourseImage src={image} alt={`${title} cover`} className="absolute inset-0 h-full w-full object-cover opacity-80 transition duration-500 group-hover:scale-105" />
@@ -43,6 +46,7 @@ export default function CourseCard({
           {title}
         </h3>
       </div>
-    </motion.a>
+      </motion.div>
+    </Link>
   );
 }

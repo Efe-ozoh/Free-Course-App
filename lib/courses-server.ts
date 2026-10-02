@@ -1,7 +1,8 @@
 import "server-only";
 import { unstable_cache } from "next/cache";
+import { cache } from "react";
 import { db } from "../db_firebase/firebase";
-import { ref, get, query, orderByChild, equalTo, limitToFirst } from "firebase/database";
+import { ref, get } from "firebase/database";
 import type { Course, StoredCourse } from "./courses";
 
 const normalizeCourse = (id: string, value: unknown): StoredCourse => {
@@ -46,15 +47,7 @@ export async function getCourses(limit = 12): Promise<StoredCourse[]> {
 }
 
 export async function getCoursesPage(offset = 0, limit = 12): Promise<StoredCourse[]> {
-  const snapshot = await get(ref(db, "courses"));
-
-  if (!snapshot.exists()) return [];
-
-  const data = snapshot.val() as Record<string, unknown>;
-
-  const publishedCourses = Object.entries(data)
-    .map(([id, value]) => normalizeCourse(id, value))
-    .filter((course) => course.published !== false)
+  const publishedCourses = [...await getAllCourses()]
     .sort((a, b) => Number(b.createdAt ?? 0) - Number(a.createdAt ?? 0));
 
   return publishedCourses.slice(offset, offset + limit);
@@ -64,7 +57,7 @@ export async function getAllCourses(): Promise<StoredCourse[]> {
   return getCachedAllCourses();
 }
 
-export async function getCourse(id: string): Promise<StoredCourse | null> {
+export const getCourse = cache(async (id: string): Promise<StoredCourse | null> => {
   const getCachedCourse = unstable_cache(
     async (): Promise<StoredCourse | null> => {
       const snapshot = await get(ref(db, `courses/${id}`));
@@ -78,4 +71,4 @@ export async function getCourse(id: string): Promise<StoredCourse | null> {
   );
 
   return getCachedCourse();
-}
+});

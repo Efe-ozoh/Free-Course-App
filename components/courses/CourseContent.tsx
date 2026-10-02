@@ -118,9 +118,10 @@ export default function CourseContent({ initialCourses }: { initialCourses: Stor
                 <div className="col-span-full py-16 text-center text-sm text-slate-400">No courses match your search or category.</div>
             ) : (
                 <>
-                    {visibleCourses.map((course) => (
+                    {visibleCourses.map((course, index) => (
                         <CourseCard
                         key={course.id}
+                        prefetch={index < 3}
                          category={course.category}
                         title={course.title} 
                         image={course.image} 

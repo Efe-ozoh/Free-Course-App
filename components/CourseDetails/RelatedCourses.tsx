@@ -1,7 +1,7 @@
-import type { StoredCourse } from "@/lib/courses";
+import type { RelatedCourse } from "@/lib/courses";
 import CourseCard from "@/components/courses/CourseCard";
 
-export default function RelatedCourses({ courses, category }: { courses: StoredCourse[]; category: string }) {
+export default function RelatedCourses({ courses, category }: { courses: RelatedCourse[]; category: string }) {
   if (courses.length === 0) return null;
 
   return (
@@ -20,6 +20,7 @@ export default function RelatedCourses({ courses, category }: { courses: StoredC
             category={course.category}
             title={course.title}
             image={course.image}
+            prefetch
               href={`/course/${course.id}`}
           />
         ))}

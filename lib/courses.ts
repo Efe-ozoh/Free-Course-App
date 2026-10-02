@@ -17,3 +17,5 @@ export interface Course {
 
 export type StoredCourse = Course & { id: string };
 
+export type RelatedCourse = Pick<StoredCourse, "id" | "title" | "image" | "category">;
+

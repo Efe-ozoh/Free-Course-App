@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { getCourse, getCourses } from "@/lib/courses-client";
-import type { StoredCourse } from "@/lib/courses";
+import { getCourse } from "@/lib/courses-client";
+import type { RelatedCourse, StoredCourse } from "@/lib/courses";
 import CourseDetailsHero from "@/components/CourseDetails/CourseDetailsHero";
 import CourseOverview from "@/components/CourseDetails/CourseOverview";
 import RelatedCourses from "@/components/CourseDetails/RelatedCourses";
@@ -16,32 +16,42 @@ export default function CourseDetailsClient({ initialCourse }: { initialCourse?:
   const searchParams = useSearchParams();
   const courseId = searchParams.get("id");
   const [course, setCourse] = useState<CourseWithId | null>(initialCourse ?? null);
-  const [relatedCourses, setRelatedCourses] = useState<StoredCourse[]>([]);
+  const [relatedCourses, setRelatedCourses] = useState<RelatedCourse[]>([]);
   const [loading, setLoading] = useState(!initialCourse);
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    let active = true;
+
     setError(false);
     setRelatedCourses([]);
 
+    const loadRelatedCourses = (currentCourse: CourseWithId) => {
+      const params = new URLSearchParams({
+        category: currentCourse.category,
+        excludeId: currentCourse.id,
+      });
+
+      void fetch(`/api/courses?${params}`)
+        .then(async (response) => {
+          if (!response.ok) throw new Error(`Related courses request failed: ${response.status}`);
+          return (await response.json()) as { courses: RelatedCourse[] };
+        })
+        .then(({ courses }) => {
+          if (!active) return;
+
+          setRelatedCourses(courses);
+        })
+        .catch((loadError) => console.error("Failed to load related courses:", loadError));
+    };
+
     if (initialCourse) {
       setCourse(initialCourse);
-      getCourses()
-        .then((courses) => {
-          setRelatedCourses(
-            courses
-              .filter(
-                (candidate) =>
-                  candidate.id !== initialCourse.id &&
-                  candidate.published !== false &&
-                  candidate.category === initialCourse.category,
-              )
-              .slice(0, 4),
-          );
-        })
-        .catch((loadError) => console.error("Failed to load related courses:", loadError))
-        .finally(() => setLoading(false));
-      return;
+      setLoading(false);
+      loadRelatedCourses(initialCourse);
+      return () => {
+        active = false;
+      };
     }
 
     setLoading(true);
@@ -50,34 +60,39 @@ export default function CourseDetailsClient({ initialCourse }: { initialCourse?:
     if (!courseId) {
       setCourse(null);
       setLoading(false);
-      return;
+      return () => {
+        active = false;
+      };
     }
 
     getCourse(courseId)
-      .then(async (loadedCourse) => {
+      .then((loadedCourse) => {
+        if (!active) return;
+
         setCourse(loadedCourse);
+        setLoading(false);
 
         if (!loadedCourse) return;
 
-        const courses = await getCourses();
-        setRelatedCourses(
-          courses
-            .filter(
-              (candidate) =>
-                candidate.id !== loadedCourse.id &&
-                candidate.published !== false &&
-                candidate.category === loadedCourse.category,
-            )
-            .slice(0, 4),
-        );
+        loadRelatedCourses(loadedCourse);
       })
       .catch((loadError) => {
+        if (!active) return;
+
         console.error("Failed to load course:", loadError);
         setError(true);
         setCourse(null);
       })
-      .finally(() => setLoading(false));
-  }, [courseId]);
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [courseId, initialCourse]);
+
+  const displayedCourse = initialCourse ?? course;
 
   if (loading) {
     return <main className="flex min-h-[70vh] items-center justify-center text-sm text-slate-400">Loading course...</main>;
@@ -94,7 +109,7 @@ export default function CourseDetailsClient({ initialCourse }: { initialCourse?:
     );
   }
 
-  if (!course) {
+  if (!displayedCourse) {
     return (
       <main className="mx-auto flex min-h-[70vh] max-w-2xl flex-col items-center justify-center px-6 text-center">
         <BookOpen className="h-10 w-10 text-indigo-500" />
@@ -108,9 +123,9 @@ export default function CourseDetailsClient({ initialCourse }: { initialCourse?:
   return (
     <main className="min-h-screen bg-[#f7f8fc] pb-16 text-slate-900">
       <div className="mx-auto w-full px-4 py-8 sm:w-[90%] sm:px-0 lg:w-[80%] lg:py-12">
-        <CourseDetailsHero course={course} />
-        <CourseOverview course={course} />
-        <RelatedCourses courses={relatedCourses} category={course.category} />
+        <CourseDetailsHero course={displayedCourse} />
+        <CourseOverview course={displayedCourse} />
+        <RelatedCourses courses={relatedCourses} category={displayedCourse.category} />
       </div>
     </main>
   );

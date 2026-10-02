@@ -2,16 +2,7 @@ import { Suspense } from "react";
 import { getAllCourses } from "@/lib/courses-server";
 import CourseContent from "./CourseContent";
 
-export default async function Courses() {
-    let courses;
-
-    try {
-        courses = await getAllCourses();
-    } catch (error) {
-        console.error("Failed to load courses:", error);
-        return <p className="col-span-full py-16 text-center text-sm text-rose-500">Unable to load courses. Please refresh and try again.</p>;
-    }
-
+export default function Courses() {
     return (
         <Suspense
             fallback={
@@ -25,7 +16,22 @@ export default async function Courses() {
                 </div>
             }
         >
-            <CourseContent initialCourses={courses} />
+            <CourseList />
         </Suspense>
+    );
+}
+
+async function CourseList() {
+    let courses;
+
+    try {
+        courses = await getAllCourses();
+    } catch (error) {
+        console.error("Failed to load courses:", error);
+        return <p className="col-span-full py-16 text-center text-sm text-rose-500">Unable to load courses. Please refresh and try again.</p>;
+    }
+
+    return (
+        <CourseContent initialCourses={courses} />
     );
 }
