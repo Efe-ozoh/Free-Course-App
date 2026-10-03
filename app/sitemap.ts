@@ -2,6 +2,8 @@
 import type { MetadataRoute } from 'next';
 import { getAllCourses } from '@/lib/courses-server';
 
+export const dynamic = 'force-dynamic';
+
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://eduliver.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {

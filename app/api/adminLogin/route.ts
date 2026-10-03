@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
+export const dynamic = "force-dynamic";
+
 function base64UrlEncode(value: string) {
   const bytes = new TextEncoder().encode(value);
 

@@ -1,6 +1,4 @@
 import "server-only";
-import { unstable_cache } from "next/cache";
-import { cache } from "react";
 import { db } from "../db_firebase/firebase";
 import { ref, get } from "firebase/database";
 import type { Course, StoredCourse } from "./courses";
@@ -30,20 +28,8 @@ const readPublishedCourses = async (limit?: number): Promise<StoredCourse[]> => 
   return typeof limit === "number" ? courses.slice(0, limit) : courses;
 };
 
-const getCachedAllCourses = unstable_cache(
-  async (): Promise<StoredCourse[]> => readPublishedCourses(),
-  ["courses-list-all"],
-  { revalidate: 3600, tags: ["courses-list"] },
-);
-
-const getCachedCourses = unstable_cache(
-  async (limit = 12): Promise<StoredCourse[]> => readPublishedCourses(limit),
-  ["courses-list"],
-  { revalidate: 3600, tags: ["courses-list"] },
-);
-
 export async function getCourses(limit = 12): Promise<StoredCourse[]> {
-  return getCachedCourses(limit);
+  return readPublishedCourses(limit);
 }
 
 export async function getCoursesPage(offset = 0, limit = 12): Promise<StoredCourse[]> {
@@ -54,7 +40,7 @@ export async function getCoursesPage(offset = 0, limit = 12): Promise<StoredCour
 }
 
 export async function getAllCourses(): Promise<StoredCourse[]> {
-  return getCachedAllCourses();
+  return readPublishedCourses();
 }
 
 export async function getCourse(

@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { CheckCircle2, ImagePlus, LoaderCircle, Link2 } from "lucide-react";
 import { addCourse, updateCourse } from "@/lib/courses-client";
-import { revalidateCoursesCache } from "@/app/actions/courses";
 import type { Course } from "@/lib/courses";
 import CourseImage from "@/components/courses/CourseImage";
 
@@ -56,15 +55,12 @@ export default function CourseForm({ initialCourse, courseId, onSaved }: { initi
 
     setLoading(true);
     try {
-      let changedCourseId = courseId;
-
       if (courseId) {
         await updateCourse(courseId, trimmedCourse);
       } else {
-        changedCourseId = (await addCourse(trimmedCourse)) ?? undefined;
+        await addCourse(trimmedCourse);
         setCourse(emptyCourse);
       }
-      await revalidateCoursesCache(changedCourseId);
       setSubmitted(true);
       onSaved?.();
     } catch (error) {

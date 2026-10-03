@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { getCourse } from "@/lib/courses-server";
 import { getAffiliateUrl } from "@/utils/affiliate";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const courseId = searchParams.get("courseId");
