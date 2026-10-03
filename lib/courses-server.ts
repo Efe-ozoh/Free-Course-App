@@ -1,8 +1,10 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import type { Course, StoredCourse } from "./courses";
 
 const FIREBASE_REQUEST_TIMEOUT_MS = 15_000;
+const COURSE_CACHE_REVALIDATE_SECONDS = 300;
 
 async function readFirebaseJson(path: string): Promise<unknown> {
   const databaseUrl = process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL;
@@ -54,7 +56,7 @@ const normalizeCourse = (id: string, value: unknown): StoredCourse => {
   };
 };
 
-const readPublishedCourses = async (limit?: number): Promise<StoredCourse[]> => {
+const readPublishedCourses = async (): Promise<StoredCourse[]> => {
   const data = await readFirebaseJson("courses");
 
   if (data === null) return [];
@@ -67,11 +69,20 @@ const readPublishedCourses = async (limit?: number): Promise<StoredCourse[]> => 
     .map(([id, value]) => normalizeCourse(id, value))
     .filter((course) => course.published !== false);
 
-  return typeof limit === "number" ? courses.slice(0, limit) : courses;
+  return courses;
 };
 
+const getCachedPublishedCourses = unstable_cache(
+  readPublishedCourses,
+  ["published-courses"],
+  {
+    revalidate: COURSE_CACHE_REVALIDATE_SECONDS,
+    tags: ["courses"],
+  },
+);
+
 export async function getCourses(limit = 12): Promise<StoredCourse[]> {
-  return readPublishedCourses(limit);
+  return (await getAllCourses()).slice(0, limit);
 }
 
 export async function getCoursesPage(offset = 0, limit = 12): Promise<StoredCourse[]> {
@@ -82,18 +93,29 @@ export async function getCoursesPage(offset = 0, limit = 12): Promise<StoredCour
 }
 
 export async function getAllCourses(): Promise<StoredCourse[]> {
-  return readPublishedCourses();
+  return getCachedPublishedCourses();
 }
 
-// Metadata and the page body request the same course during one render.
-export const getCourse = cache(async (id: string): Promise<StoredCourse | null> => {
-  const data = await readFirebaseJson(`courses/${encodeURIComponent(id)}`);
+const getCachedCourse = unstable_cache(
+  async (id: string): Promise<StoredCourse | null> => {
+    const data = await readFirebaseJson(`courses/${encodeURIComponent(id)}`);
 
-  if (data === null) return null;
+    if (data === null) return null;
 
-  if (typeof data !== "object" || Array.isArray(data)) {
-    throw new Error(`Firebase course response is invalid for course ${id}`);
-  }
+    if (typeof data !== "object" || Array.isArray(data)) {
+      throw new Error(`Firebase course response is invalid for course ${id}`);
+    }
 
-  return normalizeCourse(id, data);
-});
+    return normalizeCourse(id, data);
+  },
+  ["course-by-id"],
+  {
+    revalidate: COURSE_CACHE_REVALIDATE_SECONDS,
+    tags: ["courses"],
+  },
+);
+
+// Metadata and the page body can share one cold course read in the same render.
+export const getCourse = cache(
+  async (id: string): Promise<StoredCourse | null> => getCachedCourse(id),
+);

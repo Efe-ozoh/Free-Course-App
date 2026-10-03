@@ -17,22 +17,31 @@ export default function CourseDetailsClient({ initialCourse }: { initialCourse?:
   const courseId = searchParams.get("id");
   const [course, setCourse] = useState<CourseWithId | null>(initialCourse ?? null);
   const [relatedCourses, setRelatedCourses] = useState<RelatedCourse[]>([]);
+  const [relatedStatus, setRelatedStatus] = useState<"idle" | "loading" | "loaded" | "error">(
+    initialCourse ? "loading" : "idle",
+  );
+  const [relatedRetry, setRelatedRetry] = useState(0);
   const [loading, setLoading] = useState(!initialCourse);
   const [error, setError] = useState(false);
 
   useEffect(() => {
     let active = true;
+    const controller = new AbortController();
 
     setError(false);
     setRelatedCourses([]);
 
     const loadRelatedCourses = (currentCourse: CourseWithId) => {
+      setRelatedStatus("loading");
       const params = new URLSearchParams({
         category: currentCourse.category,
         excludeId: currentCourse.id,
       });
 
-      void fetch(`/api/courses?${params}`)
+      void fetch(`/api/courses?${params}`, {
+        cache: "no-store",
+        signal: controller.signal,
+      })
         .then(async (response) => {
           if (!response.ok) throw new Error(`Related courses request failed: ${response.status}`);
           return (await response.json()) as { courses: RelatedCourse[] };
@@ -41,8 +50,14 @@ export default function CourseDetailsClient({ initialCourse }: { initialCourse?:
           if (!active) return;
 
           setRelatedCourses(courses);
+          setRelatedStatus("loaded");
         })
-        .catch((loadError) => console.error("Failed to load related courses:", loadError));
+        .catch((loadError) => {
+          if (!active || controller.signal.aborted) return;
+
+          console.error("Failed to load related courses:", loadError);
+          setRelatedStatus("error");
+        });
     };
 
     if (initialCourse) {
@@ -51,6 +66,7 @@ export default function CourseDetailsClient({ initialCourse }: { initialCourse?:
       loadRelatedCourses(initialCourse);
       return () => {
         active = false;
+        controller.abort();
       };
     }
 
@@ -60,8 +76,10 @@ export default function CourseDetailsClient({ initialCourse }: { initialCourse?:
     if (!courseId) {
       setCourse(null);
       setLoading(false);
+      setRelatedStatus("idle");
       return () => {
         active = false;
+        controller.abort();
       };
     }
 
@@ -72,7 +90,10 @@ export default function CourseDetailsClient({ initialCourse }: { initialCourse?:
         setCourse(loadedCourse);
         setLoading(false);
 
-        if (!loadedCourse) return;
+        if (!loadedCourse) {
+          setRelatedStatus("idle");
+          return;
+        }
 
         loadRelatedCourses(loadedCourse);
       })
@@ -82,6 +103,7 @@ export default function CourseDetailsClient({ initialCourse }: { initialCourse?:
         console.error("Failed to load course:", loadError);
         setError(true);
         setCourse(null);
+        setRelatedStatus("idle");
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -89,8 +111,9 @@ export default function CourseDetailsClient({ initialCourse }: { initialCourse?:
 
     return () => {
       active = false;
+      controller.abort();
     };
-  }, [courseId, initialCourse]);
+  }, [courseId, initialCourse, relatedRetry]);
 
   const displayedCourse = initialCourse ?? course;
 
@@ -125,7 +148,12 @@ export default function CourseDetailsClient({ initialCourse }: { initialCourse?:
       <div className="mx-auto w-full px-4 py-8 sm:w-[90%] sm:px-0 lg:w-[80%] lg:py-12">
         <CourseDetailsHero course={displayedCourse} />
         <CourseOverview course={displayedCourse} />
-        <RelatedCourses courses={relatedCourses} category={displayedCourse.category} />
+        <RelatedCourses
+          courses={relatedCourses}
+          category={displayedCourse.category}
+          status={relatedStatus}
+          onRetry={() => setRelatedRetry((attempt) => attempt + 1)}
+        />
       </div>
     </main>
   );

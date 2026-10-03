@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { deleteCourse, getCourses } from "@/lib/courses-client";
+import { invalidateCoursesCache } from "@/app/actions/courses";
 import type { StoredCourse } from "@/lib/courses";
 
 export function useAdminCourses() {
@@ -31,6 +32,7 @@ export function useAdminCourses() {
 
     try {
       await deleteCourse(id);
+      await invalidateCoursesCache();
       await loadCourses();
     } catch (error) {
       console.error("Failed to delete course:", error);
