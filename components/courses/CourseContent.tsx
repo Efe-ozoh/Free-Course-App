@@ -6,30 +6,19 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import CourseCard from "./CourseCard";
 import type { StoredCourse } from "@/lib/courses";
 
-function shuffleCourses(courses: StoredCourse[]) {
-    const shuffledCourses = [...courses];
-    for (let index = shuffledCourses.length - 1; index > 0; index -= 1) {
-        const randomIndex = Math.floor(Math.random() * (index + 1));
-        [shuffledCourses[index], shuffledCourses[randomIndex]] = [shuffledCourses[randomIndex], shuffledCourses[index]];
-    }
-    return shuffledCourses;
-}
-
 export default function CourseContent({ initialCourses }: { initialCourses: StoredCourse[] }) {
     const searchParams = useSearchParams();
     const router = useRouter();
     const pathname = usePathname();
 
-    const [courses, setCourses] = useState<StoredCourse[]>(initialCourses);
     const [visibleCount, setVisibleCount] = useState(Math.min(initialCourses.length, 12));
     const [searchInput, setSearchInput] = useState(searchParams.get("search") ?? "");
 
     useEffect(() => {
-        setCourses(shuffleCourses(initialCourses));
-        setVisibleCount(Math.min(initialCourses.length, 12));
-    }, [initialCourses]);
+        setSearchInput(searchParams.get("search") ?? "");
+    }, [searchParams]);
 
-    
+    const courses = initialCourses;
     const search = searchParams.get("search") ?? "";
     const category = searchParams.get("category") ?? "All categories";
     const categories = Array.from(new Set(courses.map((course) => course.category).filter(Boolean))).sort();

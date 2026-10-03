@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { getCourse } from "@/lib/courses-server";
-import { getAffiliateUrl } from "@/utils/affiliate";
 
 export const dynamic = "force-dynamic";
 
@@ -19,11 +18,9 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL("/", request.url));
     }
 
-    const finalTrackingUrl = getAffiliateUrl(course.platform, course.link);
-
-    return NextResponse.redirect(finalTrackingUrl);
+    return NextResponse.redirect(course.link);
   } catch (error) {
-    console.error("Affiliate redirect caught error:", error);
+    console.error("Course redirect failed:", error);
     return NextResponse.redirect(new URL("/", request.url));
   }
 }
