@@ -57,18 +57,12 @@ export async function getAllCourses(): Promise<StoredCourse[]> {
   return getCachedAllCourses();
 }
 
-export const getCourse = cache(async (id: string): Promise<StoredCourse | null> => {
-  const getCachedCourse = unstable_cache(
-    async (): Promise<StoredCourse | null> => {
-      const snapshot = await get(ref(db, `courses/${id}`));
+export async function getCourse(
+  id: string
+): Promise<StoredCourse | null> {
+  const snapshot = await get(ref(db, `courses/${id}`));
 
-      if (!snapshot.exists()) return null;
+  if (!snapshot.exists()) return null;
 
-      return normalizeCourse(id, snapshot.val());
-    },
-    ["course", id],
-    { revalidate: 3600, tags: [`course:${id}`] },
-  );
-
-  return getCachedCourse();
-});
+  return normalizeCourse(id, snapshot.val());
+}
